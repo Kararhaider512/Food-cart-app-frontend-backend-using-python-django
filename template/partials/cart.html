@@ -1,0 +1,32 @@
+<h1 id="cart-count" class="cart_items-number red-hat-text-700">
+  Your cart ({{cartItems|length}})
+</h1>
+{% for item in cartItems %}
+<div id="cart-item-{{ item.id }}" class="first-item">
+  <p class="cart_item_name">{{ item.product_name }}</p>
+  <input type="hidden" name="id[]" value="{{ item.id }}" />
+  <input type="hidden" name="quantity[]" value="{{ item.quantity }}" />
+  <input
+    type="hidden"
+    name="price[]"
+    value="{{ item.product.product_price }}"
+  />
+  <div class="item_amount">
+    <p id="total_item">{{ item.quantity }}x</p>
+    <p id="total_amount">@ ${{ item.product_price }}</p>
+    <p id="total_bill">${{ item.total_price }}</p>
+    <button
+      class="cross_button"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-delete="/remove-item/{{ item.product_id }}"
+      hx-target="#cart-items-container"
+    >
+      <i class="fa-solid fa-delete-left"></i>
+    </button>
+  </div>
+</div>
+{% endfor %}
+<div class="Total_order">
+  <h2 class="Total_order_text">Total Order</h2>
+  <h2 id="Total_amount">${{totalBill}}</h2>
+</div>

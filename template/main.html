@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Red+Hat+Text:ital,wght@0,300..700;1,300..700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- displays site properly based on user's device -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./assets/images/favicon-32x32.png"
+    />
+
+    <link rel="stylesheet" href="/static/index.css?{% now "U" %}" />
+
+    <title>Frontend Mentor | Product list with cart</title>
+
+    <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
+    <style>
+      .attribution {
+        font-size: 11px;
+        text-align: center;
+      }
+      .attribution a {
+        color: hsl(228, 45%, 44%);
+      }
+    </style>
+    <!-- <link rel="stylesheet" href="index.js" type="text/Javascript" /> -->
+    <script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
+  </head>
+  <body class="main_body red-hat-text-600">
+    <section id="mainSection" class="main_section">
+      <section class="items_main_section">
+        <h1 class="main_heading">Desserts</h1>
+        <div class="items_section">
+          {% for n in productsdata %}
+          <div class="item_detail">
+            <img
+              class="item_img"
+              src="/static/./assets/images/{{n.product_img}}"
+              alt="Product image"
+            />
+            <button class="add-to-cart-button" hx-disabled-elt="this" hx-indicator=".loading-indicator" hx-post="/add-to-cart/{{ n.id }}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-target="#cart-items-container" hx-swap="innerHTML">
+              <i class="fa-solid fa-cart-shopping"></i> Add to cart
+              <span class="loading-indicator"></span>
+            </button>
+            <p class="item_id">{{n.id}}</p>
+            <p id="item" class="item_name .red-hat-text-400">{{n.product_name}}</p>
+            <p class="item_discription .red-hat-text-700">
+              {{n.product_desc}}
+            </p>
+            <p id="itemPrice" class="item_price">${{n.product_price}}</p>
+          </div>
+        {% endfor %}
+      </section>
+      <section class="Cart_section">
+        {% if user.is_authenticated %}
+          <div class="registration_section">
+            <h2>Hello, {{ user.username }}!</h2>
+            <button class="reg_button" onclick="window.location.href='{% url 'logout' %}'">Logout</button>
+          </div>
+        {% else %}
+          <div class="registration_section">
+            <button class="reg_button" onclick="window.location.href='{% url 'login' %}'">Login</button>
+            <button class="reg_button" onclick="window.location.href='{% url 'signup' %}'">Signup</button>
+          </div>
+        {% endif %}
+        
+        <form method="post" >
+          {% csrf_token %}
+      </div>
+        <div id="cart-items-container">
+          <h1 id="cart-count" class="cart_items-number red-hat-text-700">
+            Your cart ({{cart_data|length}})
+          </h1>
+          {% for product_id, item in cart_data.items %}
+          <div id="cart-item-{{ item.id }}" class="first-item">
+            <p class="cart_item_name">{{ item.product_name }}</p>
+            <input type="hidden" name="id[]" value="{{ item.id }}">
+            <input type="hidden" name="quantity[]" value="{{ item.quantity }}">
+            <input type="hidden" name="price[]" value="{{ item.product_price }}">
+            <div class="item_amount">
+              <p id="total_item">{{ item.quantity }}x</p>
+              <p id="total_amount">@ ${{ item.product_price }}</p>
+              <p id="total_bill">${{ item.total_price }}</p>
+              <button 
+              class="cross_button" 
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              hx-delete="/remove-item/{{ item.product_id }}" 
+              hx-target="#cart-items-container" 
+              hx-swap="innerHTML">
+              <i class="fa-solid fa-delete-left"></i>
+            </button>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="Total_order">
+            <h2 class="Total_order_text">Total Order</h2>
+            <h2 id="Total_amount">${{ total_bill }}</h2>
+          </div>
+        </div>
+        
+        <div class="Delivery_note">
+          <p class="Delivery_note_text">
+            <i class="fa-solid fa-tree"></i> This is a
+            <b>Carbon Free</b> Delivery
+          </p>
+        </div>
+          <button class="confirm_button" onclick="openConfirmationBox() , addConfirmedItems()" type="submit" id="confirmOrderButton">Confirm Order</button>
+        </form>  
+      </section>
+    </section>
+    
+    <!-- <script src="/static/index.js"></script> -->
+  </body>
+</html>
